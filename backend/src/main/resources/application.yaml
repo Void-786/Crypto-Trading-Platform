@@ -1,0 +1,33 @@
+server:
+  port: 5454
+
+spring:
+  application:
+    name: Crypto Trading Platform
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/crypto_trading_platform
+    username: root
+    password: Void@786
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+stripe:
+  api:
+    key: StripeTestApiKeyHere
+
+razorpay:
+  api:
+    key: rzp_test_RonlMDO4q4iSPY
+    secret: vMnCEn1h3yzR4WYJMmszZ48d
+
+coingecko:
+  api:
+    key: CG-W2GjuJfLmKbQSroiYcyNwG3x
