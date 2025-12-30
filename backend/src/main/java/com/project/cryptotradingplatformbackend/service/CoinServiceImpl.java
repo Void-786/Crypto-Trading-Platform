@@ -1,5 +1,8 @@
 package com.project.cryptotradingplatformbackend.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.cryptotradingplatformbackend.modal.Coin;
 import com.project.cryptotradingplatformbackend.repository.CoinRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,9 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,10 +86,10 @@ public class CoinServiceImpl implements CoinService {
 
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
             Coin coin = new Coin();
-            coin.setId(jsonNode.get("id").asString());
-            coin.setName(jsonNode.get("name").asString());
-            coin.setSymbol(jsonNode.get("symbol").asString());
-            coin.setImage(jsonNode.get("image").get("large").asString());
+            coin.setId(jsonNode.get("id").asText());
+            coin.setName(jsonNode.get("name").asText());
+            coin.setSymbol(jsonNode.get("symbol").asText());
+            coin.setImage(jsonNode.get("image").get("large").asText());
 
             JsonNode marketData = jsonNode.get("market_data");
             coin.setCurrent_price(marketData.get("current_price").get("usd").asDouble());

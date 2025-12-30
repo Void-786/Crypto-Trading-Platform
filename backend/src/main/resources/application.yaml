@@ -25,9 +25,13 @@ stripe:
 
 razorpay:
   api:
-    key: rzp_test_RonlMDO4q4iSPY
-    secret: vMnCEn1h3yzR4WYJMmszZ48d
+    key: ${RAZORPAY_API_KEY}
+    secret: ${RAZORPAY_API_SECRET}
 
 coingecko:
   api:
-    key: CG-W2GjuJfLmKbQSroiYcyNwG3x
+    key: ${COINGECKO_API_KEY}
+
+gemini:
+  api:
+    key: ${GEMINI_API_KEY}
