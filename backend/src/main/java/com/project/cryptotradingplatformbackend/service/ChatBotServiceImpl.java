@@ -1,7 +1,10 @@
 package com.project.cryptotradingplatformbackend.service;
 
+import com.jayway.jsonpath.JsonPath;
 import com.project.cryptotradingplatformbackend.dto.CoinDto;
 import com.project.cryptotradingplatformbackend.response.ApiResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,68 +21,138 @@ public class ChatBotServiceImpl implements ChatBotService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    private double convertToDouble(Object value) {
-        return switch (value) {
-            case Integer i -> i.doubleValue();
-            case Long l -> l.doubleValue();
-            case Double v -> v;
-            case null, default ->
-                    throw new IllegalArgumentException("Unsupported number type" + value.getClass().getName());
-        };
-    }
+    private static final String OPENROUTER_URL =
+            "https://openrouter.ai/api/v1/chat/completions";
 
-    public CoinDto makeApiRequest(String currencyName) throws Exception {
-        String url = "https://api.coingecko.com/api/v3/coins/bitcoin";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<Map> responseEntity = restTemplate.getForEntity(url, Map.class);
-        Map<String, Object> responseBody = responseEntity.getBody();
-        
-        if(responseBody != null) {
-            Map<String, Object> image = (Map<String, Object>) responseBody.get("image");
-            Map<String, Object> marketData = (Map<String, Object>) responseBody.get("market_data");
-
-            CoinDto coinDto = new CoinDto();
-            coinDto.setId((String) responseBody.get("id"));
-            coinDto.setName((String) responseBody.get("name"));
-            coinDto.setSymbol((String) responseBody.get("symbol"));
-            coinDto.setImage((String) image.get("large"));
-
-            //market data
-            coinDto.setCurrentPrice(convertToDouble(((Map<String, Object>) marketData.get("current_price")).get("usd")));
-            coinDto.setMarketCap(convertToDouble(((Map<String, Object>) marketData.get("market_cap")).get("usd")));
-            coinDto.setMarketCapRank((int) marketData.get("market_cap_rank"));
-            coinDto.setTotalVolume(convertToDouble(((Map<String, Object>) marketData.get("total_volume")).get("usd")));
-            coinDto.setHigh24h(convertToDouble(((Map<String, Object>) marketData.get("high_24h")).get("usd")));
-            coinDto.setLow24h(convertToDouble(((Map<String, Object>) marketData.get("low_24h")).get("usd")));
-            coinDto.setPriceChange24h(convertToDouble((marketData.get("price_change_24h"))));
-            coinDto.setPriceChangePercentage24h(convertToDouble((marketData.get("price_change_percentage_24h"))));
-            coinDto.setMarketCapChange24h(convertToDouble((marketData.get("market_cap_change_24h"))));
-            coinDto.setMarketCapChangePercentage24h(convertToDouble((marketData.get("market_cap_change_percentage_24h"))));
-            coinDto.setCirculatingSupply(convertToDouble((marketData.get("circulating_supply"))));
-            coinDto.setTotalSupply(convertToDouble((marketData.get("total_supply"))));
-
-            return coinDto;
-        }
-        throw new Exception("Coin not found !");
-    }
+    /* ===================== PUBLIC API ===================== */
 
     @Override
     public ApiResponse getCoinDetails(String prompt) throws Exception {
-        CoinDto coinDto = makeApiRequest(prompt);
-        System.out.println("coin dto ----" + coinDto);
-        return null;
+
+        String coin = detectCoin(prompt);
+
+        // Fallback to normal chat
+        if (coin == null) {
+            ApiResponse response = new ApiResponse();
+            response.setMessage(simpleChat(prompt));
+            return response;
+        }
+
+        CoinDto coinDto = makeApiRequest(coin);
+        String explanation = explainWithLLM(prompt, coinDto);
+
+        ApiResponse response = new ApiResponse();
+        response.setMessage(explanation);
+        return response;
     }
 
     @Override
     public String simpleChat(String prompt) {
+        return callLLM(prompt);
+    }
+
+    /* ===================== INTENT ===================== */
+
+    private String detectCoin(String prompt) {
+        String p = prompt.toLowerCase();
+        if (p.contains("bitcoin") || p.contains("btc")) return "bitcoin";
+        if (p.contains("ethereum") || p.contains("eth")) return "ethereum";
+        if (p.contains("solana") || p.contains("sol")) return "solana";
+        return null;
+    }
+
+    /* ===================== LLM ===================== */
+
+    private String callLLM(String content) {
+
+        HttpHeaders headers = baseHeaders();
+
+        JSONObject body = new JSONObject()
+                .put("model", "meta-llama/llama-3.1-405b-instruct:free")
+                .put("messages", new JSONArray().put(
+                        new JSONObject()
+                                .put("role", "user")
+                                .put("content", content)
+                ))
+                .put("max_tokens", 150);
+
+        ResponseEntity<String> response = new RestTemplate()
+                .postForEntity(OPENROUTER_URL,
+                        new HttpEntity<>(body.toString(), headers),
+                        String.class);
+
+        System.out.println("LLM RESPONSE: " + response.getBody());
+
+        return JsonPath.read(response.getBody(),
+                "$.choices[0].message.content");
+    }
+
+    private String explainWithLLM(String prompt, CoinDto coin) {
+
+        String context = """
+                User asked: %s
+
+                Real market data:
+                Name: %s
+                Price (USD): %.2f
+                Market Cap: %.2f
+                Rank: %d
+
+                Explain clearly and concisely.
+                """.formatted(
+                prompt,
+                coin.getName(),
+                coin.getCurrentPrice(),
+                coin.getMarketCap(),
+                coin.getMarketCapRank()
+        );
+
+        return callLLM(context);
+    }
+
+    /* ===================== COINGECKO ===================== */
+
+    public CoinDto makeApiRequest(String coinId) throws Exception {
+
+        String url = "https://api.coingecko.com/api/v3/coins/" + coinId;
+
+        ResponseEntity<Map> response =
+                new RestTemplate().getForEntity(url, Map.class);
+
+        Map<String, Object> body = response.getBody();
+        if (body == null) throw new Exception("Coin not found");
+
+        Map<String, Object> market =
+                (Map<String, Object>) body.get("market_data");
+
+        CoinDto dto = new CoinDto();
+        dto.setId((String) body.get("id"));
+        dto.setName((String) body.get("name"));
+        dto.setSymbol((String) body.get("symbol"));
+        dto.setMarketCapRank((Integer) market.get("market_cap_rank"));
+
+        dto.setCurrentPrice(
+                ((Number)((Map<?, ?>)market.get("current_price"))
+                        .get("usd")).doubleValue()
+        );
+
+        dto.setMarketCap(
+                ((Number)((Map<?, ?>)market.get("market_cap"))
+                        .get("usd")).doubleValue()
+        );
+
+        System.out.println("COIN FETCHED: " + dto.getName());
+        return dto;
+    }
+
+    /* ===================== HEADERS ===================== */
+
+    private HttpHeaders baseHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-//        String requestBody = new
-        return "";
+        headers.setBearerAuth(apiKey);
+        headers.add("HTTP-Referer", "http://localhost:5454");
+        headers.add("X-Title", "Crypto Trading Platform");
+        return headers;
     }
 }

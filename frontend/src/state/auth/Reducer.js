@@ -1,13 +1,4 @@
-import { REGISTER_REQUEST,
-        REGISTER_SUCCESS,
-        REGISTER_FAILURE,
-        LOGIN_REQUEST,
-        GET_USER_REQUEST,
-        LOGIN_SUCCESS, 
-        LOGIN_FAILURE,
-        GET_USER_FAILURE,
-        GET_USER_SUCCESS,
-        LOGOUT } from "./ActionType"
+import * as types from "./ActionType"
 
 const initialState = {
     loading: false,
@@ -19,24 +10,24 @@ const initialState = {
 const authReducer = (state = initialState, action) => {
     switch (action.type) {
 
-        case REGISTER_REQUEST:
-        case LOGIN_REQUEST:
-        case GET_USER_REQUEST:
+        case types.REGISTER_REQUEST:
+        case types.LOGIN_REQUEST:
+        case types.GET_USER_REQUEST:
             return {...state, loading: true, error: null}
 
-        case REGISTER_SUCCESS:
-        case LOGIN_SUCCESS:
+        case types.REGISTER_SUCCESS:
+        case types.LOGIN_SUCCESS:
             return {...state, loading: false, error:null, jwt: action.payload}
 
-        case GET_USER_SUCCESS:
+        case types.GET_USER_SUCCESS:
             return {...state, loading: false, error:null, user: action.payload}
 
-        case REGISTER_FAILURE:
-        case LOGIN_FAILURE:
-        case GET_USER_FAILURE:
+        case types.REGISTER_FAILURE:
+        case types.LOGIN_FAILURE:
+        case types.GET_USER_FAILURE:
             return {...state, loading: false, error: action.payload}
 
-        case LOGOUT:
+        case types.LOGOUT:
             return initialState
 
         default:

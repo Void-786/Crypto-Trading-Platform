@@ -23,10 +23,14 @@ public class ChatBotController {
     @PostMapping()
     public ResponseEntity<ApiResponse> getCoinDetails(@RequestBody PromptBody prompt) throws Exception {
 
-        chatBotService.getCoinDetails(prompt.getPrompt());
+        ApiResponse response = chatBotService.getCoinDetails(prompt.getPrompt());
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
 
-        ApiResponse response = new ApiResponse();
-        response.setMessage(prompt.getPrompt());
+    @PostMapping("/simple")
+    public ResponseEntity<String> simpleChatHandler(@RequestBody PromptBody prompt) {
+
+        String response = chatBotService.simpleChat(prompt.getPrompt());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 }
