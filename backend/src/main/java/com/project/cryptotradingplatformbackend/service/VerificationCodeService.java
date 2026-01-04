@@ -10,7 +10,9 @@ public interface VerificationCodeService {
 
     VerificationCode getVerificationCodeById(Long id) throws Exception;
 
-    VerificationCode getVerificationCodeByUser(Long userId);
+    VerificationCode getVerificationCodeByUser(User user);
 
     void deleteVerificationCode(VerificationCode verificationCode);
+
+    boolean verifyOtp(String otp, VerificationCode verificationCode);
 }

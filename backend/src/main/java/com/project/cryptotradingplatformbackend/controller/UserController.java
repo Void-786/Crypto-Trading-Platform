@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
+@RequestMapping
 public class UserController {
 
     private final UserService userService;
@@ -44,10 +45,16 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @GetMapping("/api/users/email/{email}")
+    public ResponseEntity<User> getUserByEmail(@PathVariable String email, @RequestHeader("Authorization") String jwt) throws Exception {
+        User user = userService.findUserByEmail(email);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
     @PostMapping("/api/users/verification/{verificationType}/send-otp")
     public ResponseEntity<String> sendVerificationOtp(@RequestHeader("Authorization") String jwt, @PathVariable VerificationType verificationType) throws Exception {
         User user = userService.findUserProfileByJwt(jwt);
-        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user.getId());
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user);
 
         if(verificationCode == null) {
             verificationCode = verificationCodeService.sendVerificationCode(user, verificationType);
@@ -62,10 +69,14 @@ public class UserController {
     @PatchMapping("/api/users/enable-2fa/verify-otp/{otp}")
     public ResponseEntity<User> enableTwoFactorAuthentication(@PathVariable String otp, @RequestHeader("Authorization") String jwt) throws Exception {
         User user = userService.findUserProfileByJwt(jwt);
-        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user.getId());
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user);
+
+        if (verificationCode == null) {
+            throw new Exception("OTP expired or not generated");
+        }
 
         String sendTo = verificationCode.getVerificationType().equals(VerificationType.EMAIL) ? verificationCode.getEmail() : verificationCode.getMobile();
-        boolean isVerified = verificationCode.getOtp().equals(otp);
+        boolean isVerified = verificationCodeService.verifyOtp(otp, verificationCode);
 
         if(isVerified) {
             User updatedUser = userService.enableTwoFactorAuthentication(verificationCode.getVerificationType(), sendTo, user);
@@ -73,6 +84,20 @@ public class UserController {
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);
         }
 
+        throw new Exception("Invalid OTP");
+    }
+
+    @PatchMapping("/api/users/verification/verify-otp/{otp}")
+    public ResponseEntity<User> verifyOtp(@PathVariable String otp, @RequestHeader("Authorization") String jwt) throws Exception {
+        User user = userService.findUserProfileByJwt(jwt);
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user);
+        boolean isVerified = verificationCodeService.verifyOtp(otp, verificationCode);
+
+        if(isVerified) {
+            verificationCodeService.deleteVerificationCode(verificationCode);
+            User verifiedUser = userService.verifyUser(user);
+            return ResponseEntity.ok(verifiedUser);
+        }
         throw new Exception("Invalid OTP");
     }
 
@@ -87,7 +112,7 @@ public class UserController {
         if(token == null) {
             token = forgotPasswordService.createToken(user, id, otp, req.getVerificationType(), req.getSendTo());
         }
-        if(req.getVerificationType().equals(VerificationType.EMAIL)) {
+        if (VerificationType.EMAIL.equals(req.getVerificationType())) {
             emailService.sendVerificationOtpEmail(user.getEmail(), token.getOtp());
         }
 

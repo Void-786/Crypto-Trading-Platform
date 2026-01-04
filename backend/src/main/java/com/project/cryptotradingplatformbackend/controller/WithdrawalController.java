@@ -1,12 +1,13 @@
 package com.project.cryptotradingplatformbackend.controller;
 
+import com.project.cryptotradingplatformbackend.domain.WalletTransactionType;
 import com.project.cryptotradingplatformbackend.modal.User;
 import com.project.cryptotradingplatformbackend.modal.Wallet;
 import com.project.cryptotradingplatformbackend.modal.Withdrawal;
 import com.project.cryptotradingplatformbackend.service.UserService;
 import com.project.cryptotradingplatformbackend.service.WalletService;
+import com.project.cryptotradingplatformbackend.service.WalletTransactionService;
 import com.project.cryptotradingplatformbackend.service.WithdrawalService;
-import lombok.With;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +21,13 @@ public class WithdrawalController {
     private final WithdrawalService withdrawalService;
     private final WalletService walletService;
     private final UserService userService;
+    private final WalletTransactionService walletTransactionService;
 
-    public WithdrawalController(WithdrawalService withdrawalService, WalletService walletService, UserService userService) {
+    public WithdrawalController(WithdrawalService withdrawalService, WalletService walletService, UserService userService, WalletTransactionService walletTransactionService) {
         this.withdrawalService = withdrawalService;
         this.walletService = walletService;
         this.userService = userService;
+        this.walletTransactionService = walletTransactionService;
     }
 
     @PostMapping("/api/withdrawal/{amount}")
@@ -34,6 +37,8 @@ public class WithdrawalController {
 
         Withdrawal withdrawal = withdrawalService.requestWithdrawal(amount, user);
         walletService.addBalanceToWallet(wallet, -withdrawal.getAmount());
+
+        walletTransactionService.createWalletTransaction(wallet, WalletTransactionType.WITHDRAWAL, null, "Bank Account Withdrawl", withdrawal.getAmount());
 
         return new ResponseEntity<>(withdrawal, HttpStatus.OK);
     }
@@ -51,7 +56,7 @@ public class WithdrawalController {
         return new ResponseEntity<>(withdrawal, HttpStatus.OK);
     }
 
-    @GetMapping("/api/withdrawal/history")
+    @GetMapping("/api/withdrawal")
     public ResponseEntity<List<Withdrawal>> getWithdrawalHistory(@RequestHeader("Authorization") String jwt) throws Exception {
         User user = userService.findUserProfileByJwt(jwt);
         List<Withdrawal> withdrawals = withdrawalService.getUserWithdrawalHistory(user);
@@ -59,9 +64,9 @@ public class WithdrawalController {
         return new ResponseEntity<>(withdrawals, HttpStatus.OK);
     }
 
-    @GetMapping("/api/admin/withdrawal/all")
+    @GetMapping("/api/admin/withdrawal")
     public ResponseEntity<List<Withdrawal>> getAllWithdrawalsRequest(@RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+        userService.findUserProfileByJwt(jwt);
         List<Withdrawal> withdrawals = withdrawalService.getAllWithdrawalRequest();
 
         return new ResponseEntity<>(withdrawals, HttpStatus.OK);

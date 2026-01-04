@@ -4,14 +4,21 @@ import { VerifiedIcon } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import AccountVerificationForm from './AccountVerificationForm'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { enableTwoStepVerification, verifyOtp } from '@/state/auth/Action'
 
 const Profile = () => {
 
   const {auth} = useSelector(store => store)
+  const dispatch = useDispatch()
 
-  const handleEnableTwoStepVerification = (data) => {
-    console.log('Two-Step Verification Data:', data)
+  const handleEnableTwoStepVerification = (otp) => {
+    console.log('Two-Step Verification Data:', otp)
+    dispatch(enableTwoStepVerification({jwt: localStorage.getItem('jwt'), otp}))
+  }
+
+  const handleVerifyOtp = (otp) => {
+    dispatch(verifyOtp({jwt: localStorage.getItem('jwt'), otp}))
   }
 
   return (
@@ -82,12 +89,14 @@ const Profile = () => {
             <CardHeader>
               <div className='flex items-center gap-3'>
                 <CardTitle>Two-Step Verification</CardTitle>
-                {true ? <Badge className=' text-white bg-green-600'>
-                  <VerifiedIcon />
-                  <span>Enabled</span>
-                </Badge>
-                :
-                <Badge className='bg-orange-500'>Disabled</Badge>}
+                {auth.user.twoFactorAuth?.enabled ? (
+                  <Badge className=' text-white bg-green-600'>
+                    <VerifiedIcon />
+                    <span>Enabled</span>
+                  </Badge>
+                ) : (
+                <Badge className='bg-orange-500'>Disabled</Badge>
+              )}
               </div>
             </CardHeader>
             <CardContent>
@@ -101,6 +110,84 @@ const Profile = () => {
                       <DialogTitle>Verify Your Account</DialogTitle>
                     </DialogHeader>
                     <AccountVerificationForm handleSubmit={handleEnableTwoStepVerification} />
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:flex gap-5 mt-5">
+          <Card className="w-full">
+            <CardHeader className="pb-7">
+              <CardTitle>Change Password</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5 ">
+              <div className="flex items-center">
+                <p className="w-[8rem]">Email :</p>
+                <p>{auth.user.email}</p>
+              </div>
+              <div className="flex items-center">
+                <p className="w-[8rem]">Mobile :</p>
+                <p>+918987667899</p>
+              </div>
+              <div className="flex items-center">
+                <p className="w-[8rem]">Password :</p>
+                <Button variant="secondary">Change Password</Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Close Account</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5 ">
+              <div className="flex items-center">
+                <p className="w-[8rem]">Customer Id :</p>
+                <p>#53DKJ736</p>
+              </div>
+              <div className="flex items-center">
+                <p className="w-[8rem]">Account :</p>
+                <Button variant="secondary">Close Account</Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="w-full">
+            <CardHeader className="pb-7">
+              <div className="flex items-center gap-3">
+                <CardTitle>Account Status</CardTitle>
+
+                {auth.user.verified ? (
+                  <Badge className="space-x-2 text-white bg-green-600">
+                    <VerifiedIcon /> <span>verified</span>
+                  </Badge>
+                ) : (
+                  <Badge className="bg-orange-500">pending</Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex items-center">
+                <p className="w-[8rem]">Email :</p>
+                <p>{auth.user.email}</p>
+              </div>
+              <div className="flex items-center">
+                <p className="w-[8rem]">Mobile :</p>
+                <p>+918987667899</p>
+              </div>
+              <div>
+                <Dialog>
+                  <DialogTrigger>
+                    <Button>Verify Account</Button>
+                    
+                  </DialogTrigger>
+                  <DialogContent className="">
+                    <DialogHeader className="">
+                      <DialogTitle className="px-10 pt-5 text-center">
+                        verify your account
+                      </DialogTitle>
+                    </DialogHeader>
+                    <AccountVerificationForm handleSubmit={handleVerifyOtp}/>
                   </DialogContent>
                 </Dialog>
               </div>

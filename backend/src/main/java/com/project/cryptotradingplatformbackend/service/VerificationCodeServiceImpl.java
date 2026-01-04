@@ -6,6 +6,7 @@ import com.project.cryptotradingplatformbackend.modal.VerificationCode;
 import com.project.cryptotradingplatformbackend.repository.VerificationCodeRepository;
 import com.project.cryptotradingplatformbackend.utils.OtpUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,7 +20,13 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     }
 
     @Override
+    @Transactional
     public VerificationCode sendVerificationCode(User user, VerificationType verificationType) {
+        VerificationCode existing = verificationCodeRepo.findByUserId(user.getId());
+        if (existing != null) {
+            verificationCodeRepo.delete(existing);
+        }
+
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setOtp(OtpUtils.generateOTP());
         verificationCode.setVerificationType(verificationType);
@@ -38,12 +45,18 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     }
 
     @Override
-    public VerificationCode getVerificationCodeByUser(Long userId) {
-        return verificationCodeRepo.findByUserId(userId);
+    public VerificationCode getVerificationCodeByUser(User user) {
+        return verificationCodeRepo.findByUserId(user.getId());
     }
 
     @Override
+    @Transactional
     public void deleteVerificationCode(VerificationCode verificationCode) {
         verificationCodeRepo.delete(verificationCode);
+    }
+
+    @Override
+    public boolean verifyOtp(String otp, VerificationCode verificationCode) {
+        return otp.equals(verificationCode.getOtp());
     }
 }

@@ -7,9 +7,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/crypto_trading_platform
-    username: root
-    password: Void@786
+    url: jdbc:mysql://localhost:3306/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -18,6 +18,26 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SCRET}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 stripe:
   api:
@@ -32,6 +52,6 @@ coingecko:
   api:
     key: ${COINGECKO_API_KEY}
 
-gemini:
+openRouter:
   api:
-    key: ${GEMINI_API_KEY}
+    key: ${OPENROUTER_API_KEY}

@@ -1,4 +1,4 @@
-import api from "@/config/api" 
+import api from "@/api/api"
 import * as types from "./ActionType"
 
 export const getCoinList = (page) => async (dispatch) => {
@@ -27,6 +27,21 @@ export const getTop50CoinList = () => async (dispatch) => {
 
     } catch (error) {
         dispatch({ type: types.FETCH_TOP_50_COINS_FAILURE, payload: error.message })
+        console.log(error);
+    }
+}
+
+export const fetchTrendingCoinList = () => async (dispatch) => {
+
+    dispatch({ type: types.FETCH_TRENDING_COINS_REQUEST })
+
+    try {
+        const response = await api.get('/coins/trending')
+        dispatch({ type: types.FETCH_TRENDING_COINS_SUCCESS, payload: response.data })
+        console.log("Trending Coins", response.data)
+
+    } catch (error) {
+        dispatch({ type: types.FETCH_TRENDING_COINS_FAILURE, payload: error.message })
         console.log(error);
     }
 }

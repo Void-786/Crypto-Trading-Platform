@@ -21,5 +21,6 @@ public class VerificationCode {
 
     private String mobile;
 
+    @Enumerated(EnumType.STRING)
     private VerificationType verificationType;
 }

@@ -13,7 +13,7 @@ import TradingForm from './TradingForm'
 
 const StockDetails = () => {
 
-  const {coin, watchlist} = useSelector(store => store);
+  const { coin, watchlist, auth } = useSelector(store => store);
   const dispatch = useDispatch();
   const {id} = useParams();
 

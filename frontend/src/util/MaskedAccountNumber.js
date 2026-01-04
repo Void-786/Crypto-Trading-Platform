@@ -1,4 +1,4 @@
-export function MaskedAccountNumber(accountNumber) {
+export function maskedAccountNumber(accountNumber) {
     if(accountNumber.length > 4) {
         const last4Digits = accountNumber.slice(-4);
         const maskedDigits = '*'.repeat(accountNumber.length - 4) + last4Digits;
@@ -9,4 +9,4 @@ export function MaskedAccountNumber(accountNumber) {
     }
 }
 
-export default MaskedAccountNumber;
+export default maskedAccountNumber;

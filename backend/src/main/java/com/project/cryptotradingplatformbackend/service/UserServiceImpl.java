@@ -64,4 +64,9 @@ public class UserServiceImpl implements UserService {
         userRepo.save(user);
     }
 
+    @Override
+    public User verifyUser(User user) {
+        user.setVerified(true);
+        return userRepo.save(user);
+    }
 }

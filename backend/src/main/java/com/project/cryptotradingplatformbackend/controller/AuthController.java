@@ -4,21 +4,23 @@ import com.project.cryptotradingplatformbackend.config.JwtProvider;
 import com.project.cryptotradingplatformbackend.modal.TwoFactorOTP;
 import com.project.cryptotradingplatformbackend.modal.User;
 import com.project.cryptotradingplatformbackend.repository.UserRepository;
-import com.project.cryptotradingplatformbackend.request.LoginRequest;
 import com.project.cryptotradingplatformbackend.response.AuthResponse;
-import com.project.cryptotradingplatformbackend.service.CustomUserDetailsService;
-import com.project.cryptotradingplatformbackend.service.EmailService;
-import com.project.cryptotradingplatformbackend.service.TwoFactorOtpService;
-import com.project.cryptotradingplatformbackend.service.WatchlistService;
+import com.project.cryptotradingplatformbackend.service.*;
 import com.project.cryptotradingplatformbackend.utils.OtpUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/auth")
@@ -41,27 +43,39 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> register(@RequestBody User user) throws Exception {
 
+        String email = user.getEmail();
+        String password = user.getPassword();
+        String fullName = user.getFullName();
+        String mobile = user.getMobile();
+
         User isEmailExists = userRepo.findByEmail(user.getEmail());
         if (isEmailExists != null) {
             throw new Exception("Email already exists... ");
         }
 
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            throw new Exception("Email is required");
+        }
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new Exception("Password is required");
+        }
+
         User newUser = new User();
-        newUser.setFullName(user.getFullName());
-        newUser.setEmail(user.getEmail());
-        newUser.setPassword(user.getPassword());
+        newUser.setFullName(fullName);
+        newUser.setEmail(email);
+        newUser.setPassword(password);
+        newUser.setMobile(mobile);
 
         userRepo.save(newUser);
         watchlistService.createWatchlist(newUser);
 
-        Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+        Authentication auth = new UsernamePasswordAuthenticationToken(email, password, AuthorityUtils.createAuthorityList("ROLE_USER"));
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         String jwt = JwtProvider.generateToken(auth);
 
         AuthResponse authResponse = new AuthResponse();
         authResponse.setJwt(jwt);
-        authResponse.setStatus(true);
         authResponse.setMessage("Registered Successfully");
 
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
@@ -133,5 +147,22 @@ public class AuthController {
         }
 
         return new  UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
+    }
+
+    @GetMapping("/login/google")
+    public void redirectToGoogle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.sendRedirect("/login/oauth2/authorization/google");
+    }
+
+    @GetMapping("/login/oauth2/code/google")
+    public User handleGoogleCallback(@RequestParam(required = false) String code, @RequestParam(required = false) String state, OAuth2AuthenticationToken authentication) {
+        String email = authentication.getPrincipal().getAttribute("email");
+        String fullName = authentication.getPrincipal().getAttribute("name");
+
+        User user = new User();
+        user.setEmail(email);
+        user.setFullName(fullName);
+
+        return user;
     }
 }

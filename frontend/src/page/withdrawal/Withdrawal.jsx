@@ -1,16 +1,16 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getWitdrawalHistory } from '@/state/withdrawal/Action';
-import ReadableTimeStamp from '@/util/ReadableTimeStamp';
+import { getWithdrawalHistory } from '@/state/withdrawal/Action';
+import readableTimeStamp from '@/util/readableTimeStamp';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Withdrawal = () => {
 
   const dispatch = useDispatch();
-  const {wallet, withdrawal} = useSelector(store => store);
+  const {withdrawal} = useSelector(store => store);
 
   useEffect(() => {
-    dispatch(getWitdrawalHistory({ jwt: localStorage.getItem("jwt") }));
+    dispatch(getWithdrawalHistory({ jwt: localStorage.getItem("jwt") }));
   }, [])
 
   return (
@@ -28,7 +28,7 @@ const Withdrawal = () => {
         </TableHeader>
         <TableBody>
             {withdrawal.history.map((item) => (<TableRow key={item.id}>
-                <TableCell><p>{ReadableTimeStamp(item.date)}</p></TableCell>
+                <TableCell><p>{readableTimeStamp(item.date)}</p></TableCell>
                 <TableCell className="px-4 py-3">{"Bank Account"}</TableCell>
                 <TableCell className="px-4 py-3 text-right">${item.amount}</TableCell>
                 <TableCell className="px-4 py-3 text-right">{item.withdrawalStatus}</TableCell>

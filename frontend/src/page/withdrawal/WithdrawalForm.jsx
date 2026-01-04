@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { withdrawalRequest } from '@/state/withdrawal/Action';
-import MaskedAccountNumber from '@/util/MaskedAccountNumber';
+import maskedAccountNumber from '@/util/maskedAccountNumber';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -46,7 +46,7 @@ const WithdrawalForm = () => {
                 <img className='h-8 w-8' src={bankLogo} alt='Bank Logo' />
                 <div>
                     <p className='text-xl font-bold'>{withdrawal.paymentDetails?.bankName}</p>
-                    <p className='text-xs'>{MaskedAccountNumber(withdrawal.paymentDetails?.accountNumber)}</p>
+                    <p className='text-xs'>{maskedAccountNumber(withdrawal.paymentDetails?.accountNumber)}</p>
                 </div>
             </div>
         </div>

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { fetchMarketChart } from '@/state/coin/Action';
 import {useEffect, useState} from 'react'
 import ReactApexChart from 'react-apexcharts';
@@ -39,7 +40,18 @@ const StockChart = ({coinId}) => {
 
     useEffect(() => {
         dispatch(fetchMarketChart({coinId, days: activeLable.value, jwt: localStorage.getItem('jwt')}));
-    }, [dispatch, coinId, activeLable]);
+    }, [dispatch, coinId, activeLable.value]);
+
+    if (coin.marketChart.loading) {
+        return (
+            <div className="flex justify-center items-center h-[483px]">
+            <Button disabled variant="outline" className="flex gap-2">
+                <Spinner />
+                <span>Loading chart...</span>
+            </Button>
+            </div>
+        )
+    }
 
     const series = [
         {
@@ -100,6 +112,7 @@ const StockChart = ({coinId}) => {
                 {timeSeries.map((item) => <Button key = {item.lable}
                     variant={activeLable.lable == item.lable ? '' : 'outline'}
                     onClick={() => handleActiveChange(item)}
+                    className=' cursor-pointer'
                     >
                     {item.lable}
                 </Button>)}

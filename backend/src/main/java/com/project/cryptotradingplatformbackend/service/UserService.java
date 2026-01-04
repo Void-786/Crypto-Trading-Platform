@@ -14,4 +14,6 @@ public interface UserService {
     User enableTwoFactorAuthentication(VerificationType verificationType, String sendTo, User user);
 
     void updatePassword(User user, String newPassword);
+
+    User verifyUser(User user);
 }

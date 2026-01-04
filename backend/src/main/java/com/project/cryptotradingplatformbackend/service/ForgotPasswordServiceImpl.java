@@ -17,7 +17,6 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         this.forgotPasswordRepo = forgotPasswordRepo;
     }
 
-
     @Override
     public ForgotPasswordToken createToken(User user, String id, String otp, VerificationType verificationType, String sendTo) {
         ForgotPasswordToken token = new ForgotPasswordToken();
@@ -44,5 +43,10 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Override
     public void deleteToken(ForgotPasswordToken token) {
         forgotPasswordRepo.delete(token);
+    }
+
+    @Override
+    public boolean verifyToken(ForgotPasswordToken token, String otp) {
+        return token.getOtp().equals(otp);
     }
 }

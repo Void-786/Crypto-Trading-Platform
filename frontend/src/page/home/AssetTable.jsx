@@ -1,15 +1,25 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarImage } from '@radix-ui/react-avatar'
 import { useNavigate } from 'react-router-dom'
 
-const AssetTable = ({coin, category}) => {
+const AssetTable = ({coin, loading}) => {
 
     const navigate = useNavigate();
 
+    if (loading) {
+        return (
+            <div className="h-[77.3vh] flex items-center justify-center">
+                <Spinner />
+                <span>Loading Data...</span>
+            </div>
+        )
+    }
+
     return (
         <Table>
-            <ScrollArea className={`${category == 'all' ? 'h-[77.3vh]' : 'h-[82vh]'} pr-4`}>
+            <ScrollArea className="h-full pr-4">
                 <TableHeader>
                 <TableRow>
                     <TableHead className="w-[220px] text-left">Coin</TableHead>
@@ -24,9 +34,6 @@ const AssetTable = ({coin, category}) => {
 
             <TableBody>
                 {coin.map((item) => {
-                const change = item.price_change_percentage_24h;
-                const nameParts = item.name.split(' ');
-
                 return (
                     <TableRow
                         key={item.id}

@@ -1,5 +1,5 @@
-import api from '@/config/api';
-import * as types from './ActionType'
+import api from '@/api/api';
+import * as types from './ActionType';
 
 export const withdrawalRequest = ({amount, jwt}) => async (dispatch) => {
 
@@ -41,12 +41,12 @@ export const proceedWithdrawal = ({ id, jwt, accept }) => async (dispatch) => {
     }
 }
 
-export const getWitdrawalHistory = ({ jwt }) => async (dispatch) => {
+export const getWithdrawalHistory = ({ jwt }) => async (dispatch) => {
 
     dispatch({ type: types.GET_WITHDRAWAL_HISTORY_REQUEST });
 
     try {
-        const response = await api.get(`/api/withdrawal/history`, {
+        const response = await api.get(`/api/withdrawal`, {
             headers: {
                 Authorization: `Bearer ${jwt}`
             }
@@ -61,12 +61,12 @@ export const getWitdrawalHistory = ({ jwt }) => async (dispatch) => {
     }
 }
 
-export const getAllWithdrawalHistoryRequest = ({ jwt }) => async (dispatch) => {
+export const getAllWithdrawalRequest = ({ jwt }) => async (dispatch) => {
 
     dispatch({ type: types.GET_WITHDRAWAL_REQUEST_REQUEST });
 
     try {
-        const response = await api.get(`/api/admin/withdrawal/all`, {
+        const response = await api.get(`/api/admin/withdrawal`, {
             headers: {
                 Authorization: `Bearer ${jwt}`
             }

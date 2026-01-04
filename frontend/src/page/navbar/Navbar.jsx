@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { DragHandleHorizontalIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import crypto from '../../assets/crypto.jpg'
-import Sidebar from './Sidebar'
+import Sidebar from '../sidebar/Sidebar'
 import { useSelector } from 'react-redux'
 import { useNavigate } from "react-router-dom"
 

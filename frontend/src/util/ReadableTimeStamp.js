@@ -1,4 +1,4 @@
-export const ReadableTimestamp=(timestamp)=>{
+export const readableTimestamp=(timestamp)=>{
     const date = new Date(timestamp);
 
     const options = {
@@ -15,4 +15,4 @@ export const ReadableTimestamp=(timestamp)=>{
     return formattedDate;
 }
 
-export default ReadableTimestamp;
+export default readableTimestamp;
