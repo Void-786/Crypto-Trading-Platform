@@ -8,7 +8,6 @@ import { transferMoney } from '@/state/wallet/Action';
 const TransferForm = () => {
 
   const dispatch = useDispatch();
-  const {wallet} = useSelector(store => store);
 
   const [formData, setFormData] = useState({
     amount: '',
@@ -39,12 +38,12 @@ const TransferForm = () => {
       </div>
 
       <div>
-        <h1 className='pb-1'>Enter Purpose</h1>
+        <h1 className='pb-1'>Purpose</h1>
         <Input name='purpose' onChange={handleChange} value={formData.purpose} className='py-7' placeholder='Gift for your friend...'/>
       </div>
 
       <DialogClose className='w-full'>
-        <Button onClick={handleSubmit} className='w-full py-7'>Submit</Button>
+        <Button onClick={handleSubmit} className='w-full py-7'>Send</Button>
       </DialogClose>
     </div>
   )

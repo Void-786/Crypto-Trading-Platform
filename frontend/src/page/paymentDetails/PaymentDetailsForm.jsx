@@ -2,16 +2,34 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { DialogClose } from '@/components/ui/dialog'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { addPaymentDetails } from '@/state/withdrawal/Action'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { Spinner } from '@/components/ui/spinner'
+
+
+const formSchema = yup.object().shape({
+  accountHolderName: yup.string().required("Account Holder Name is required"),
+  ifscCode: yup.string().length(11, "IFSC Code must be exactly 11 characters").required("IFSC Code is required"),
+  accountNumber: yup.string().required("Account Number is required"),
+  confirmAccountNumber: yup.string().test({
+    name: "match",
+    message: "Account Numbers do not match",
+    test: function(value) {
+      return value === this.parent.accountNumber;
+    }
+  }),
+  bankName: yup.string().required("Bank Name is required"),
+});
 
 const PaymentDetailsForm = () => {
 
   const dispatch = useDispatch();
+  const { auth, withdrawal } = useSelector(store => store);
 
   const form = useForm({
-    resolver: "",
+    resolver: yupResolver(formSchema),
     defaultValues: {
       accountHolderName: "",
       ifscCode: "",
@@ -80,9 +98,17 @@ const PaymentDetailsForm = () => {
             </FormItem>
           )}/>
 
-          <DialogClose className='w-full'>
+          {/* <DialogClose className='w-full'>
             <Button type='submit' className='w-full py-5'>Submit</Button>
-          </DialogClose>
+          </DialogClose> */}
+          <Button
+            type="submit"
+            className="w-full py-5 flex items-center gap-2"
+            disabled={withdrawal.loading}
+          >
+            {withdrawal.loading && <Spinner />}
+            {withdrawal.loading ? "Submitting..." : "SUBMIT"}
+          </Button>
 
         </form>
       </Form>

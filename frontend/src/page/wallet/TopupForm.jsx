@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import razorPayLogo from '@/assets/Razorpay-Logo.jpg'
 import stripeLogo from '@/assets/stripe-logo.png'
 import { Button } from '@/components/ui/button';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { paymentHandler } from '@/state/wallet/Action';
+import { Spinner } from '@/components/ui/spinner';
 
 
 const TopupForm = () => {
@@ -15,6 +16,7 @@ const TopupForm = () => {
     const [amount, setAmount] = useState();
     const [paymentMethod, setPaymentMethod] = useState('RAZORPAY');
     const dispatch = useDispatch();
+    const { wallet } = useSelector(store => store);
 
     const handlePaymentMethodChange = (value) => {
         setPaymentMethod(value);
@@ -62,7 +64,14 @@ const TopupForm = () => {
             </RadioGroup>
         </div>
 
-        <Button onClick={handleSubmit} className='w-full py-7 '>Submit</Button>
+        <Button
+            onClick={handleSubmit}
+            className="w-full py-7 text-xl flex items-center justify-center gap-2"
+            disabled={wallet.loading}
+            >
+            {wallet.loading && <Spinner />}
+            {wallet.loading ? "Submitting..." : "Submit"}
+        </Button>
     </div>
   )
 }

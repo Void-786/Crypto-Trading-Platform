@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import StockChart from '../home/StockChart'
 import TradingForm from './TradingForm'
+import { Spinner } from '@/components/ui/spinner'
 
 const StockDetails = () => {
 
@@ -27,6 +28,17 @@ const StockDetails = () => {
   }
 
   const change24h = coin.coinDetails?.market_data.market_cap_change_24h;
+
+  if(coin.loading) {
+    return (
+      <div className="flex justify-center items-center h-[483px]">
+        <Button disabled className="flex gap-2">
+          <Spinner />
+          <span>Loading chart...</span>
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className='p-5'>

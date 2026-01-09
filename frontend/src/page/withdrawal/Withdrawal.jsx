@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 const Withdrawal = () => {
 
   const dispatch = useDispatch();
-  const {withdrawal} = useSelector(store => store);
+  const { withdrawal } = useSelector(store => store);
 
   useEffect(() => {
     dispatch(getWithdrawalHistory({ jwt: localStorage.getItem("jwt") }));

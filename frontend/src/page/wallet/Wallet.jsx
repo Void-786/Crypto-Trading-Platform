@@ -10,6 +10,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useEffect } from 'react'
 import { depositMoney, getUserWallet, getWalletTransaction } from '@/state/wallet/Action'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { getPaymentDetails } from '@/state/withdrawal/Action'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -18,7 +21,7 @@ function useQuery() {
 const Wallet = () => {
 
   const dispatch = useDispatch();
-  const {wallet} = useSelector(store => store);
+  const { wallet } = useSelector(store => store);
   const query = useQuery();
   const orderId = query.get('order_id');
   const {order_id} = useParams();
@@ -36,6 +39,7 @@ const Wallet = () => {
   useEffect(() => {
     handleFetchUserWallet()
     handleFetchWalletTransaction()
+    dispatch(getPaymentDetails({ jwt: localStorage.getItem("jwt") }));
   }, [])
 
   const handleFetchUserWallet = () => {
@@ -44,6 +48,17 @@ const Wallet = () => {
 
   const handleFetchWalletTransaction = () => {
     dispatch(getWalletTransaction({jwt: localStorage.getItem('jwt')}))
+  }
+
+  if(wallet.loading){
+    return (
+      <div className="flex justify-center items-center h-[483px]">
+        <Button disabled className="flex gap-2">
+            <Spinner />
+              <span>Loading Wallet...</span>
+            </Button>
+      </div>
+    )
   }
 
   return (
@@ -58,7 +73,7 @@ const Wallet = () => {
                   <CardTitle className='text-2xl'>My Wallet</CardTitle>
                   <div className='flex items-center gap-2'>
                     <p className='text-sm'>
-                      {wallet.userWallet?.id}
+                      #FAVHJY{wallet.userWallet?.id}
                     </p>
                     <CopyIcon size={14} className='cursor-pointer hover:text-slate-400'/>
                   </div>

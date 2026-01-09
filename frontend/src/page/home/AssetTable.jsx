@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -10,9 +11,11 @@ const AssetTable = ({coin, loading}) => {
 
     if (loading) {
         return (
-            <div className="h-[77.3vh] flex items-center justify-center">
-                <Spinner />
-                <span>Loading Data...</span>
+            <div className="flex justify-center items-center h-[483px]">
+                <Button disabled className="flex gap-2">
+                    <Spinner />
+                    <span>Loading chart...</span>
+                </Button>
             </div>
         )
     }

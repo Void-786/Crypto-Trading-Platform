@@ -17,6 +17,8 @@ const withdrawalReducer = (state = initialState, action) => {
         case types.WITHDRAWAL_PROCEED_REQUEST:
         case types.GET_WITHDRAWAL_HISTORY_REQUEST:
         case types.GET_WITHDRAWAL_REQUEST_REQUEST:
+        case types.ADD_PAYMENT_DETAILS_REQUEST:
+        case types.GET_PAYMENT_DETAILS_REQUEST:
             return { ...state, loading: true, error: null }
 
         case types.WITHDRAWAL_SUCCESS:
@@ -42,6 +44,8 @@ const withdrawalReducer = (state = initialState, action) => {
         case types.WITHDRAWAL_PROCEED_FAILURE:
         case types.GET_WITHDRAWAL_HISTORY_FAILURE:
         case types.GET_WITHDRAWAL_REQUEST_FAILURE:
+        case types.ADD_PAYMENT_DETAILS_FAILURE:
+        case types.GET_PAYMENT_DETAILS_FAILURE:
             return { ...state, loading: false, error: action.error }
 
         default:
